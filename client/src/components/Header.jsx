@@ -94,11 +94,7 @@ const Header = ({ isAuthenticated }) => {
                   Home
                 </Link>
               </li>
-              <li>
-                <Link to={"/memoriams"} className="nav-link px-3">
-                  Memoriams
-                </Link>
-              </li>
+
               {!currentUser ? (
                 <>
                   <li className="nav-item">
@@ -119,14 +115,25 @@ const Header = ({ isAuthenticated }) => {
                   </li>
                 </>
               ) : (
-                <li className="nav-item">
-                  <Link to={"/create-post"} className="nav-link fw-bold  ">
-                    <svg className="bi pe-none me-2" width="16" height="16">
-                      <use xlinkHref="#speedometer2"></use>
-                    </svg>
-                    Add Rip
-                  </Link>
-                </li>
+                <>
+                  <li>
+                    <Link to={"/memoriams"} className="nav-link px-3">
+                      Memoriams
+                    </Link>
+                  </li>
+                  {currentUser.data.roles === "sponsor" ? (
+                    <li className="nav-item">
+                      <Link to={"/create-post"} className="nav-link fw-bold  ">
+                        <svg className="bi pe-none me-2" width="16" height="16">
+                          <use xlinkHref="#speedometer2"></use>
+                        </svg>
+                        Add Rip
+                      </Link>
+                    </li>
+                  ) : (
+                    ""
+                  )}
+                </>
               )}
 
               {/* <li>

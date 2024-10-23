@@ -5,13 +5,14 @@ import WelcomeMessage from "./WelcomeMessage";
 import LoadingSpinner from "./LoadingSpinner";
 import axios from "axios";
 import { AuthContext } from "../context/authContext";
+import { Link } from "react-router-dom";
 
 function PostList() {
   const { postList, addInitialPosts } = useContext(PostListData);
   const [fetching, setFetching] = useState(false);
   const { currentUser, setCurrentUser } = useContext(AuthContext);
 
-  // console.log(postList);
+  console.log(currentUser.data.roles);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,7 +72,16 @@ function PostList() {
   return (
     <>
       <div className="sponser_btn">
-        <button onClick={becomeSponsor}>Become sponser to Add the Rip's</button>
+        {/* <button onClick={becomeSponsor}>Become sponser to Add the Rip's</button> */}
+        {currentUser.data.roles === "sponsor" ? (
+          <Link to="/create-post">
+            <button>Add Rips</button>
+          </Link>
+        ) : (
+          <button onClick={becomeSponsor}>
+            Become sponser to Add the Rip's
+          </button>
+        )}
       </div>
       <div className="post__List ">
         {fetching && <LoadingSpinner />}

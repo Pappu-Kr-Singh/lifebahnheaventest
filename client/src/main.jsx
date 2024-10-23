@@ -14,6 +14,7 @@ import UpdatePost from "./components/UpdatePost.jsx";
 import UpdateAccountDetails from "./components/UpdateAccountDetails.jsx";
 import Rip from "./components/Rip.jsx";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Home from "./pages/Home.jsx";
 // import PostDetails from "./components/PostDetails.jsx";
 
 const router = createBrowserRouter([
@@ -21,6 +22,7 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
+      { path: "/", element: <Home /> },
       { path: "/memoriams", element: <PostList /> },
       { path: "/sign-up", element: <SignUp /> },
       { path: "/login", element: <Login /> },
