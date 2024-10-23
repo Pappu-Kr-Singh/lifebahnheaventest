@@ -14,7 +14,7 @@ const Profile = () => {
   const [postImg, setPostImg] = useState([]);
   const [post, setPost] = useState({ title: "", description: "" });
 
-  // console.log(currentUser.data.user._id);
+  console.log(currentUser);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -68,35 +68,6 @@ const Profile = () => {
 
   const navigate = useNavigate();
 
-  // const handleUpdateSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   const formData = new FormData(e.target);
-  //   const { title, description } = Object.fromEntries(formData);
-
-  //   console.log("clicked", selectedPost);
-
-  //   try {
-  //     const postRes = await axios.patch(
-  //       `http://localhost:3000/api/v1/posts/${selectedPost._id}`,
-  //       { title, description },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${currentUser?.data.accessToken}`,
-  //         },
-  //       }
-  //     );
-
-  //     console.log("Insideclicked", selectedPost);
-  //     console.log(postRes.data);
-
-  //     navigate("/profile");
-  //   } catch (err) {
-  //     console.log(err);
-  //     setError(err.response?.data?.message || "An error occurred");
-  //   }
-  // };
-
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
 
@@ -143,7 +114,7 @@ const Profile = () => {
                 </div>
                 <div className="Name">
                   <p>Username: {currentUser.data.user.userName}</p>
-                  <p>Current Role: {currentUser.data.roles}</p>
+                  <p>Current Role: {currentUser.data.user.roles}</p>
                 </div>
                 <span className="text-white">
                   id:

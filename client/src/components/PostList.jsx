@@ -12,7 +12,7 @@ function PostList() {
   const [fetching, setFetching] = useState(false);
   const { currentUser, setCurrentUser } = useContext(AuthContext);
 
-  console.log(currentUser.data.roles);
+  console.log(currentUser?.data.user.roles);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,7 +73,7 @@ function PostList() {
     <>
       <div className="sponser_btn">
         {/* <button onClick={becomeSponsor}>Become sponser to Add the Rip's</button> */}
-        {currentUser.data.roles === "sponsor" ? (
+        {currentUser.data.user.roles === "sponsor" ? (
           <Link to="/create-post">
             <button>Add Rips</button>
           </Link>
