@@ -12,6 +12,8 @@ import {
   getUserChannelProfile,
   getWatchHistory,
   updateUserRoleToSponsor,
+  getAllNormalUsers,
+  updateUserRole,
 } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -42,6 +44,11 @@ router.route("/change-password").post(verifyJWT, changeCurrentPassword);
 router.route("/current-user").get(verifyJWT, getCurrentUser);
 router.route("/update-account").patch(verifyJWT, updateAccountDetails);
 router.route("/become-sponsor").patch(verifyJWT, updateUserRoleToSponsor);
+// Get all normal users
+router.get("/normal", getAllNormalUsers);
+// Update user role
+
+router.patch("/:userId/roles", updateUserRole);
 router
   .route("/avatar")
   .patch(verifyJWT, upload.single("avatar"), updateUserAvatar);

@@ -107,3 +107,17 @@ a:hover {
   display: flex;
   justify-content: center;
 }
+
+.add_contributer_btn_N_heading {
+  display: flex;
+  justify-content: space-between;
+}
+
+.add_contributer_btn_N_heading h1 {
+  margin-left: 12px;
+  text-transform: capitalize;
+}
+
+.add_contributer_btn_N_heading button {
+  border-radius: 10px;
+}

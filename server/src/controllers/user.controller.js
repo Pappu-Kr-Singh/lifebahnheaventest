@@ -275,6 +275,13 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, req.user, "Current user Fetched Seccessfullly"));
 });
 
+const getAllNormalUsers = asyncHandler(async (req, res) => {
+  const users = await User.find({ roles: "normal_user" }).select(
+    "fullName _id"
+  );
+  res.status(200).json(new ApiResponse(200, users, "Normal users fetched"));
+});
+
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { fullName, email } = req.body;
 
@@ -469,6 +476,29 @@ const updateUserRoleToSponsor = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, updatedUser, "User role updated to sponsor"));
 });
 
+const updateUserRole = asyncHandler(async (req, res) => {
+  const { role } = req.body; // Get new role from request body
+  const { userId } = req.params; // Get user ID from URL params
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new ApiError(400, "Invalid user ID");
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { role },
+    { new: true }
+  );
+
+  if (!updatedUser) {
+    throw new ApiError(404, "User not found");
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, updatedUser, "User role updated successfully"));
+});
+
 const getWatchHistory = asyncHandler(async (req, res) => {
   const user = await User.aggregate([
     {
@@ -536,4 +566,6 @@ export {
   getUserChannelProfile,
   getWatchHistory,
   updateUserRoleToSponsor,
+  getAllNormalUsers,
+  updateUserRole,
 };

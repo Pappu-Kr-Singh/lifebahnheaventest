@@ -30,7 +30,7 @@ function Home() {
               <h1>LifeBahn Heaven</h1>
               <p>Become a Sponsor to Add your Rips</p>
               <Link to="/memoriams">
-                <button className="btn btn-primary">Add Rips</button>
+                <button className="btn btn-primary">Search Your Rips</button>
               </Link>
             </div>
             <div className="col-md-6 py-12">
