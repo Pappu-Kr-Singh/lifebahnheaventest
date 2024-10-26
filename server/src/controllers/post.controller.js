@@ -165,6 +165,77 @@ const getAllPost = asyncHandler(async (req, res) => {
 //     .json(new ApiResponse(200, post, "Post has been updated successfully"));
 // });
 
+// const createPost = asyncHandler(async (req, res) => {
+//   const {
+//     title,
+//     description,
+//     reactions,
+//     dateOfBirth,
+//     birthPlace,
+//     burial,
+//     plot,
+//     deathDate,
+//   } = req.body;
+
+//   if (
+//     !title ||
+//     !description ||
+//     !reactions ||
+//     !dateOfBirth ||
+//     !birthPlace ||
+//     !plot ||
+//     !deathDate
+//   ) {
+//     throw new ApiError(401, "title and description are required");
+//   }
+
+//   if (!req.files || !req.files.postImg) {
+//     throw new ApiError(401, "postImg is required");
+//   }
+
+//   const postImgBuffer = req.files.postImg[0].buffer; // Access the image buffer
+
+//   // Upload the image buffer to Cloudinary
+//   const postImg = await cloudinary.uploader
+//     .upload_stream(
+//       {
+//         resource_type: "auto",
+//       },
+//       (error, result) => {
+//         if (error) {
+//           console.error("Cloudinary upload error:", error);
+//           throw new ApiError(
+//             401,
+//             "Error while uploading the postImg to Cloudinary"
+//           );
+//         }
+//         return result;
+//       }
+//     )
+//     .end(postImgBuffer); // Pass the buffer to upload_stream
+
+//   const post = await Post.create({
+//     title,
+//     description,
+//     owner: req.user._id,
+//     reactions,
+//     birthPlace,
+//     burial,
+//     plot,
+//     dateOfBirth,
+//     deathDate,
+//     postImg: postImg.url,
+//   });
+
+//   if (!post) {
+//     throw new ApiError(401, "Error while creating a post");
+//   }
+
+//   return res
+//     .status(200)
+//     .json(new ApiResponse(200, post, "The post has been created Successfully"));
+// });
+
 const createPost = asyncHandler(async (req, res) => {
   const {
     title,
@@ -193,26 +264,25 @@ const createPost = asyncHandler(async (req, res) => {
     throw new ApiError(401, "postImg is required");
   }
 
-  const postImgBuffer = req.files.postImg[0].buffer; // Access the image buffer
+  const postImgBuffer = req.files.postImg[0].buffer;
 
   // Upload the image buffer to Cloudinary
-  const postImg = await cloudinary.uploader
-    .upload_stream(
-      {
-        resource_type: "auto",
-      },
+  const postImg = await new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { resource_type: "auto" },
       (error, result) => {
         if (error) {
           console.error("Cloudinary upload error:", error);
-          throw new ApiError(
-            401,
-            "Error while uploading the postImg to Cloudinary"
+          reject(
+            new ApiError(401, "Error while uploading the postImg to Cloudinary")
           );
+        } else {
+          resolve(result);
         }
-        return result;
       }
-    )
-    .end(postImgBuffer); // Pass the buffer to upload_stream
+    );
+    uploadStream.end(postImgBuffer);
+  });
 
   const post = await Post.create({
     title,
@@ -226,10 +296,6 @@ const createPost = asyncHandler(async (req, res) => {
     deathDate,
     postImg: postImg.url,
   });
-
-  if (!post) {
-    throw new ApiError(401, "Error while creating a post");
-  }
 
   return res
     .status(200)
