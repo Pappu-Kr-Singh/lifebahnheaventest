@@ -15,6 +15,7 @@ import UpdateAccountDetails from "./components/UpdateAccountDetails.jsx";
 import Rip from "./components/Rip.jsx";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Home from "./pages/Home.jsx";
+import AddFlower from "./components/AddFolower.jsx";
 // import PostDetails from "./components/PostDetails.jsx";
 
 const router = createBrowserRouter([
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
       { path: "/contact-us", element: <Contact /> },
       { path: "/profile/update-post", element: <UpdatePost /> },
       { path: "/create-post", element: <CreatePost /> },
+      { path: "/add-flower", element: <AddFlower /> },
       // { path: "/post/:id", element: <PostDetails /> },
 
       {

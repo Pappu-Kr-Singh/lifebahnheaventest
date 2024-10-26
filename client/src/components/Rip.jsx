@@ -1,8 +1,10 @@
 import "./style.css";
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/authContext";
+import AddFlower from "./AddFolower";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import Modal from "./Modal";
+import { Link, useParams } from "react-router-dom";
 
 function Rip() {
   const { currentUser } = useContext(AuthContext);
@@ -12,9 +14,12 @@ function Rip() {
   const [users, setUsers] = useState([]); // Store normal users
   const [selectedUser, setSelectedUser] = useState(""); // Store selected user ID
   const [showDropdown, setShowDropdown] = useState(false); // Control dropdown visibility
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [flowersData, setFlowersData] = useState([]); // Store fetched flowers data
 
   // console.log(currentUser.data.user);
   // console.log(_id);
+  console.log(flowersData);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,15 +54,34 @@ function Rip() {
             },
           }
         );
-        console.log("Fetched Users:", response.data.data); // Log the response
+        // console.log("Fetched Users:", response.data.data); // Log the response
         setUsers(response.data.data); // Check if this is setting the correct users
       } catch (error) {
         console.error("User fetch error:", error);
       }
     };
+
+    const fetchFlowers = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/v1/flowers",
+          {
+            headers: {
+              Authorization: `Bearer ${currentUser?.data.accessToken}`,
+            },
+          }
+        );
+        // console.log("Fetched flowers:", response.data.data); // Log the response
+        setFlowersData(response.data.data);
+      } catch (error) {
+        console.error("Flowers fetch error:", error);
+      }
+    };
+
     if (currentUser && _id) {
       fetchData();
       fetchUsers();
+      fetchFlowers();
     }
   }, [currentUser, _id]);
 
@@ -174,23 +198,33 @@ function Rip() {
       </div>
 
       <div className="flower_sec_btn">
-        <button className="leave_flower">Leave A Flower</button>
+        <div className="flower_sec_btn">
+          <button
+            className="leave_flower"
+            onClick={() => setIsModalOpen(true)} // Open the modal when clicked
+          >
+            Leave A Flower
+          </button>
+          <button className="say_a_prayer">Say A Prayer</button>
+        </div>
+
+        {/* Modal to show the AddFlower component */}
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <AddFlower /> {/* Render the AddFlower component inside the modal */}
+        </Modal>
         <button className="say_a_prayer">Say A Prayer</button>
       </div>
       <div className="test">
         <div className="flowers_section">
-          <div className="flower_card">
-            <img
-              src="https://img.freepik.com/free-photo/fruit-bouqeut-summer-forest_1303-11041.jpg?t=st=1729620483~exp=1729624083~hmac=a731f852be1ad57086f8fb303790bc51811ec183aeda215b3033d043cad45cde&w=826"
-              alt=""
-            />
-            <div className="flower_card_text">
-              <h5>Left By: </h5> <span>General Rain Candise</span>
-              <h5>On: </h5> <span>10 Oct 2024</span>
+          {flowersData.map((flower) => (
+            <div key={flower?.id} className="flower_card">
+              <img src={flower?.flowerImg} alt="Flower" />
+              <div className="flower_card_text">
+                <h5>Left By: {flower?.name}</h5>
+                <h5>On: {formatDate(flower.leftOn)}</h5>
+              </div>
             </div>
-          </div>
-          <div className="flower_card"></div>
-          <div className="flower_card"></div>
+          ))}
         </div>
       </div>
     </>

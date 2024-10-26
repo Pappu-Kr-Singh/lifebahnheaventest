@@ -1,5 +1,6 @@
 import { createContext, useReducer } from "react";
 
+// Post List Context creation with default values
 export const PostList = createContext({
   postList: [],
   addPost: () => {},
@@ -7,13 +8,30 @@ export const PostList = createContext({
   deletePost: () => {},
 });
 
+// Flower Store Context creation with default values
+export const FlowerStore = createContext({
+  flowerList: [],
+  addFlower: () => {},
+  addInitialFlowers: () => {},
+  deleteFlower: () => {},
+});
+
+// Prayer Store Context creation with default values
+export const prayerStore = createContext({
+  prayerList: [],
+  addPrayer: () => {},
+  addInitialPrayers: () => {},
+  deletePrayers: () => {},
+});
+
+// Post List Reducer
 const postListReducer = (currPostList, action) => {
   let newPostList = currPostList;
   if (action.type === "DELETE_POST") {
     newPostList = currPostList.filter(
       (post) => post.id !== action.payload.postId
     );
-  } else if (action.type === "ADD__INITIAL_POSTS") {
+  } else if (action.type === "ADD_INITIAL_POSTS") {
     newPostList = action.payload.posts;
   } else if (action.type === "ADD_POST") {
     newPostList = [action.payload, ...currPostList];
@@ -22,37 +40,64 @@ const postListReducer = (currPostList, action) => {
   return newPostList;
 };
 
-const PostListProvider = ({ children }) => {
-  const [postList, dispatchPostList] = useReducer(
-    postListReducer,
-    // DEFAULT_POST_LIST
-    []
-  );
+// Flower Store Reducer
+const flowerStoreReducer = (currFlowerList, action) => {
+  let newFlowerList = currFlowerList;
+  if (action.type === "DELETE_FLOWER") {
+    newFlowerList = currFlowerList.filter(
+      (flower) => flower.id !== action.payload.flowerId
+    );
+  } else if (action.type === "ADD_INITIAL_FLOWERS") {
+    newFlowerList = action.payload.flowers;
+  } else if (action.type === "ADD_FLOWER") {
+    newFlowerList = [action.payload, ...currFlowerList];
+  }
 
+  return newFlowerList;
+};
+
+// Prayer Store Reducer
+const prayerStoreReducer = (currPrayerList, action) => {
+  let newPrayerList = currPrayerList;
+  if (action.type === "DELETE_PRAYER") {
+    newPrayerList = currPrayerList.filter(
+      (flower) => flower.id !== action.payload.flowerId
+    );
+  } else if (action.type === "ADD_INITIAL_PRAYERS") {
+    newPrayerList = action.payload.prayers;
+  } else if (action.type === "ADD_PRAYER") {
+    newPrayerList = [action.payload, ...currPrayerList];
+  }
+
+  return newPrayerList;
+};
+
+const PostListProvider = ({ children }) => {
+  const [postList, dispatchPostList] = useReducer(postListReducer, []);
+  const [flowerList, dispatchFlowerList] = useReducer(flowerStoreReducer, []);
+
+  // Post List Functions
   const addPost = (userId, postTitle, reactions, postBody, tags) => {
     dispatchPostList({
       type: "ADD_POST",
       payload: {
-        // id: Date.now(),
+        id: Date.now(),
         title: postTitle,
         body: postBody,
         reactions: reactions,
-        owner: userId,
-        // img: postImg,
+        userID: userId,
         tags: tags,
       },
     });
-    // console.log(postImg);
   };
 
   const addInitialPosts = (posts) => {
     dispatchPostList({
-      type: "ADD__INITIAL_POSTS",
+      type: "ADD_INITIAL_POSTS",
       payload: {
         posts,
       },
     });
-    console.log(posts);
   };
 
   const deletePost = (postId) => {
@@ -64,33 +109,78 @@ const PostListProvider = ({ children }) => {
     });
   };
 
+  // Flower Store Functions
+  const addFlower = (flowerName, flowerPrice, flowerImage) => {
+    dispatchFlowerList({
+      type: "ADD_FLOWER",
+      payload: {
+        id: Date.now(),
+        name: flowerName,
+        price: flowerPrice,
+        image: flowerImage,
+      },
+    });
+  };
+
+  const addInitialFlowers = (flowers) => {
+    dispatchFlowerList({
+      type: "ADD_INITIAL_FLOWERS",
+      payload: {
+        flowers,
+      },
+    });
+  };
+
+  const deleteFlower = (flowerId) => {
+    dispatchFlowerList({
+      type: "DELETE_FLOWER",
+      payload: {
+        flowerId,
+      },
+    });
+  };
+
+  // Prayer Store Functions
+  const addPrayer = (name, prayerText) => {
+    dispatchFlowerList({
+      type: "ADD_FLOWER",
+      payload: {
+        id: Date.now(),
+        name: name,
+        prayerText: prayerText,
+      },
+    });
+  };
+
+  const addInitialPrayers = (prayers) => {
+    dispatchFlowerList({
+      type: "ADD_INITIAL_Prayers",
+      payload: {
+        prayers,
+      },
+    });
+  };
+
+  const deletePrayer = (prayerId) => {
+    dispatchPrayerList({
+      type: "DELETE_Prayer",
+      payload: {
+        prayerId,
+      },
+    });
+  };
+
   return (
     <PostList.Provider
       value={{ postList, addPost, deletePost, addInitialPosts }}
     >
-      {children}
+      <FlowerStore.Provider
+        value={{ flowerList, addFlower, deleteFlower, addInitialFlowers }}
+      >
+        {children}
+      </FlowerStore.Provider>
     </PostList.Provider>
   );
 };
 
-// const DEFAULT_POST_LIST = [
-//   {
-//     id: "1",
-//     title: "NEw POST FRom WeB DUdE",
-//     body: "Hii freinds I am practicing react js context api and use reducer",
-//     reactions: 20,
-//     userID: "user-10",
-//     img: "https://img.freepik.com/free-photo/social-media-marketing-concept-marketing-with-applications_23-2150063134.jpg?t=st=1718570014~exp=1718573614~hmac=beadb2bf36398fe9aea71308eac586dfd9fc7e329483234e5978102bcffe5a37&w=900",
-//     tags: ["vacation", "Learning", "REact"],
-//   },
-//   {
-//     id: "2",
-//     title: "Btech Khatam ho gyi ",
-//     body: "the golden time is now at the end ",
-//     reactions: 60,
-//     userID: "user-20",
-//     img: "https://img.freepik.com/free-photo/front-view-woman-holding-smartphone_23-2150208244.jpg?t=st=1718570057~exp=1718573657~hmac=3454cf7484d30423a98eb73aeba518c7200a46ed7de28b94903fa8cf8589bfd3&w=740",
-//     tags: ["graduation", "btech", "goldenTime"],
-//   },
-// ];
 export default PostListProvider;

@@ -476,28 +476,29 @@ const updateUserRoleToSponsor = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, updatedUser, "User role updated to sponsor"));
 });
 
-const updateUserRole = asyncHandler(async (req, res) => {
-  const { role } = req.body; // Get new role from request body
-  const { userId } = req.params; // Get user ID from URL params
+const updateUserRole = async (req, res) => {
+  const { userId } = req.params;
+  const { roles } = req.body; // This should contain 'contributor'
 
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    throw new ApiError(400, "Invalid user ID");
+  if (!userId || !roles) {
+    return res.status(400).json({ message: "User ID and role are required" });
   }
 
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    { role },
-    { new: true }
-  );
+  try {
+    const user = await User.findById(userId);
 
-  if (!updatedUser) {
-    throw new ApiError(404, "User not found");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.roles = roles; // Update role to 'contributor'
+    await user.save();
+
+    return res.status(200).json({ message: "User role updated successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "Error updating user role", error });
   }
-
-  res
-    .status(200)
-    .json(new ApiResponse(200, updatedUser, "User role updated successfully"));
-});
+};
 
 const getWatchHistory = asyncHandler(async (req, res) => {
   const user = await User.aggregate([
