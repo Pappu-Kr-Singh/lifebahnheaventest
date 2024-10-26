@@ -44,9 +44,128 @@ const getAllPost = asyncHandler(async (req, res) => {
     );
 });
 
-const createPost = asyncHandler(async (req, res) => {
-  // Create post
+// const createPost = asyncHandler(async (req, res) => {
+//   // Create post
 
+//   const {
+//     title,
+//     description,
+//     reactions,
+//     dateOfBirth,
+//     birthPlace,
+//     burial,
+//     plot,
+//     deathDate,
+//   } = req.body;
+
+//   console.log(
+//     "Req. body ===== ",
+//     title,
+//     description,
+//     reactions,
+//     dateOfBirth,
+//     birthPlace,
+//     burial,
+//     plot,
+//     deathDate
+//   );
+
+//   if (
+//     !title ||
+//     !description ||
+//     !reactions ||
+//     !dateOfBirth ||
+//     !birthPlace ||
+//     !plot ||
+//     !deathDate
+//   ) {
+//     throw new ApiError(401, "title and description are required");
+//   }
+
+//   const postImgLocalPath = req.files?.postImg[0]?.path;
+
+//   if (!postImgLocalPath) {
+//     throw new ApiError(401, "postImg is required");
+//   }
+
+//   // uploading the postImg to the cloudinary
+
+//   const postImg = await uploadOnCloudinary(postImgLocalPath);
+//   if (!postImg) {
+//     throw new ApiError(401, "Error while uploading the postImg to cloudinary");
+//   }
+
+//   const post = await Post.create({
+//     title: title,
+//     description: description,
+//     owner: req.user._id,
+//     reactions: reactions,
+//     birthPlace: birthPlace,
+//     burial: burial,
+//     plot: plot,
+//     dateOfBirth: dateOfBirth,
+//     deathDate: deathDate,
+//     postImg: postImg.url,
+//   });
+
+//   if (!post) {
+//     throw new ApiError(401, "Error while creating a post");
+//   }
+
+//   return res
+//     .status(200)
+//     .json(new ApiResponse(200, post, "The post has been created Successfully"));
+// });
+
+// const updatePost = asyncHandler(async (req, res) => {
+//   // update post
+
+//   const { postId } = req.params;
+//   const { title, description } = req.body;
+//   const { postImgLocalPath } = req.file?.path;
+//   // console.log("post img local path"postImgLocalPath);
+
+//   if (!isValidObjectId(postId)) {
+//     throw new ApiError(401, "Invalid postId");
+//   }
+
+//   if (!postImgLocalPath) {
+//     throw new ApiError(401, "postImg file is missing");
+//   }
+
+//   const oldPostImgUrl = req.post.url;
+//   console.log(oldPostImgUrl);
+
+//   const postImg = await uploadOnCloudinary(postImgLocalPath);
+//   if (!postImg.url) {
+//     throw new ApiError(401, "Error while uploading the postimg on cloudinary");
+//   }
+
+//   const post = await Post.findByIdAndUpdate(
+//     postId,
+//     {
+//       title,
+//       postDescription: description,
+//       postImg: postImg.url,
+//     },
+//     {
+//       new: true,
+//     }
+//   );
+
+//   if (!post) {
+//     throw new ApiError(401, "Error while updating the post");
+//   }
+//   if (oldPostImgUrl) {
+//     await deleteFromCloudinary(oldPostImgUrl);
+//   }
+
+//   return res
+//     .status(200)
+//     .json(new ApiResponse(200, post, "Post has been updated successfully"));
+// });
+
+const createPost = asyncHandler(async (req, res) => {
   const {
     title,
     description,
@@ -57,18 +176,6 @@ const createPost = asyncHandler(async (req, res) => {
     plot,
     deathDate,
   } = req.body;
-
-  console.log(
-    "Req. body ===== ",
-    title,
-    description,
-    reactions,
-    dateOfBirth,
-    birthPlace,
-    burial,
-    plot,
-    deathDate
-  );
 
   if (
     !title ||
@@ -82,29 +189,41 @@ const createPost = asyncHandler(async (req, res) => {
     throw new ApiError(401, "title and description are required");
   }
 
-  const postImgLocalPath = req.files?.postImg[0]?.path;
-
-  if (!postImgLocalPath) {
+  if (!req.files || !req.files.postImg) {
     throw new ApiError(401, "postImg is required");
   }
 
-  // uploading the postImg to the cloudinary
+  const postImgBuffer = req.files.postImg[0].buffer; // Access the image buffer
 
-  const postImg = await uploadOnCloudinary(postImgLocalPath);
-  if (!postImg) {
-    throw new ApiError(401, "Error while uploading the postImg to cloudinary");
-  }
+  // Upload the image buffer to Cloudinary
+  const postImg = await cloudinary.uploader
+    .upload_stream(
+      {
+        resource_type: "auto",
+      },
+      (error, result) => {
+        if (error) {
+          console.error("Cloudinary upload error:", error);
+          throw new ApiError(
+            401,
+            "Error while uploading the postImg to Cloudinary"
+          );
+        }
+        return result;
+      }
+    )
+    .end(postImgBuffer); // Pass the buffer to upload_stream
 
   const post = await Post.create({
-    title: title,
-    description: description,
+    title,
+    description,
     owner: req.user._id,
-    reactions: reactions,
-    birthPlace: birthPlace,
-    burial: burial,
-    plot: plot,
-    dateOfBirth: dateOfBirth,
-    deathDate: deathDate,
+    reactions,
+    birthPlace,
+    burial,
+    plot,
+    dateOfBirth,
+    deathDate,
     postImg: postImg.url,
   });
 
@@ -118,27 +237,41 @@ const createPost = asyncHandler(async (req, res) => {
 });
 
 const updatePost = asyncHandler(async (req, res) => {
-  // update post
-
   const { postId } = req.params;
   const { title, description } = req.body;
-  const { postImgLocalPath } = req.file?.path;
-  // console.log("post img local path"postImgLocalPath);
 
   if (!isValidObjectId(postId)) {
     throw new ApiError(401, "Invalid postId");
   }
 
-  if (!postImgLocalPath) {
-    throw new ApiError(401, "postImg file is missing");
-  }
+  const oldPost = await Post.findById(postId);
+  if (!oldPost) throw new ApiError(401, "Post not found");
 
-  const oldPostImgUrl = req.post.url;
-  console.log(oldPostImgUrl);
+  let postImgUrl = oldPost.postImg; // Default to the existing image URL
 
-  const postImg = await uploadOnCloudinary(postImgLocalPath);
-  if (!postImg.url) {
-    throw new ApiError(401, "Error while uploading the postimg on cloudinary");
+  if (req.files && req.files.postImg) {
+    const postImgBuffer = req.files.postImg[0].buffer;
+
+    const postImg = await cloudinary.uploader
+      .upload_stream(
+        {
+          resource_type: "auto",
+        },
+        (error, result) => {
+          if (error) {
+            console.error("Cloudinary upload error:", error);
+            throw new ApiError(
+              401,
+              "Error while uploading the postImg to Cloudinary"
+            );
+          }
+          return result;
+        }
+      )
+      .end(postImgBuffer);
+
+    postImgUrl = postImg.url;
+    await deleteFromCloudinary(oldPost.postImg); // Delete the old image from Cloudinary
   }
 
   const post = await Post.findByIdAndUpdate(
@@ -146,7 +279,7 @@ const updatePost = asyncHandler(async (req, res) => {
     {
       title,
       postDescription: description,
-      postImg: postImg.url,
+      postImg: postImgUrl,
     },
     {
       new: true,
@@ -155,9 +288,6 @@ const updatePost = asyncHandler(async (req, res) => {
 
   if (!post) {
     throw new ApiError(401, "Error while updating the post");
-  }
-  if (oldPostImgUrl) {
-    await deleteFromCloudinary(oldPostImgUrl);
   }
 
   return res
