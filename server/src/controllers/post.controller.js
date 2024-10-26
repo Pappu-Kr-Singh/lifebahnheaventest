@@ -268,7 +268,7 @@ const createPost = asyncHandler(async (req, res) => {
 
   // Upload the image buffer to Cloudinary
   const postImg = await new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
+    const uploadStream = uploadOnCloudinary.uploader.upload_stream(
       { resource_type: "auto" },
       (error, result) => {
         if (error) {
