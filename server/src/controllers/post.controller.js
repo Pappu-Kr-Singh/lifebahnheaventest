@@ -235,6 +235,8 @@ const getAllPost = asyncHandler(async (req, res) => {
 //     .status(200)
 //     .json(new ApiResponse(200, post, "The post has been created Successfully"));
 // });
+import { v2 as cloudinary } from "cloudinary"; // Ensure you have this import if needed in your controller
+import { uploadOnCloudinary } from "../utils/cloudinary.js"; // Ensure this import points to your cloudinary utility
 
 const createPost = asyncHandler(async (req, res) => {
   const {
@@ -248,6 +250,7 @@ const createPost = asyncHandler(async (req, res) => {
     deathDate,
   } = req.body;
 
+  // Validate required fields
   if (
     !title ||
     !description ||
@@ -257,18 +260,19 @@ const createPost = asyncHandler(async (req, res) => {
     !plot ||
     !deathDate
   ) {
-    throw new ApiError(401, "title and description are required");
+    throw new ApiError(401, "All fields are required");
   }
 
+  // Validate the uploaded image
   if (!req.files || !req.files.postImg) {
     throw new ApiError(401, "postImg is required");
   }
 
-  const postImgBuffer = req.files.postImg[0].buffer;
+  const postImgBuffer = req.files.postImg[0].buffer; // Get the image buffer
 
   // Upload the image buffer to Cloudinary
   const postImg = await new Promise((resolve, reject) => {
-    const uploadStream = uploadOnCloudinary.uploader.upload_stream(
+    const uploadStream = cloudinary.uploader.upload_stream(
       { resource_type: "auto" },
       (error, result) => {
         if (error) {
@@ -281,9 +285,10 @@ const createPost = asyncHandler(async (req, res) => {
         }
       }
     );
-    uploadStream.end(postImgBuffer);
+    uploadStream.end(postImgBuffer); // End the stream with the buffer
   });
 
+  // Create a new post with the uploaded image URL
   const post = await Post.create({
     title,
     description,
@@ -294,12 +299,13 @@ const createPost = asyncHandler(async (req, res) => {
     plot,
     dateOfBirth,
     deathDate,
-    postImg: postImg.url,
+    postImg: postImg.url, // Use the URL from Cloudinary
   });
 
+  // Return success response
   return res
     .status(200)
-    .json(new ApiResponse(200, post, "The post has been created Successfully"));
+    .json(new ApiResponse(200, post, "The post has been created successfully"));
 });
 
 const updatePost = asyncHandler(async (req, res) => {
