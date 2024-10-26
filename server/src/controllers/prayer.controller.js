@@ -50,15 +50,16 @@ const getAllPrayer = asyncHandler(async (req, res) => {
 const createPrayer = asyncHandler(async (req, res) => {
   // Create post
 
-  const { name, prayerText } = req.body;
+  const { prayerText } = req.body;
 
-  if (!name || prayerText) {
+  console.log("Prayer text", prayerText);
+
+  if (!prayerText) {
     throw new ApiError(401, "All fields is required");
   }
 
   const prayer = await Prayer.create({
     owner: req.user._id,
-    name: name,
     prayerText: prayerText,
   });
 

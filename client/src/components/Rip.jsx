@@ -2,24 +2,27 @@ import "./style.css";
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/authContext";
 import AddFlower from "./AddFolower";
+import AddPrayer from "./AddPrayer";
 import axios from "axios";
 import Modal from "./Modal";
 import { Link, useParams } from "react-router-dom";
 
 function Rip() {
   const { currentUser } = useContext(AuthContext);
+
   const [fetching, setFetching] = useState(false);
-  const [post, setPost] = useState(null); // State to store the fetched post
-  const { _id } = useParams(); // Get postId from the URL
-  const [users, setUsers] = useState([]); // Store normal users
-  const [selectedUser, setSelectedUser] = useState(""); // Store selected user ID
-  const [showDropdown, setShowDropdown] = useState(false); // Control dropdown visibility
+  const [post, setPost] = useState(null);
+  const { _id } = useParams();
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [flowersData, setFlowersData] = useState([]); // Store fetched flowers data
+  const [modalContent, setModalContent] = useState(""); // Track whether to show prayer or flower modal
+  const [flowersData, setFlowersData] = useState([]);
 
   // console.log(currentUser.data.user);
   // console.log(_id);
-  console.log(flowersData);
+  // console.log(flowersData);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -198,22 +201,32 @@ function Rip() {
       </div>
 
       <div className="flower_sec_btn">
-        <div className="flower_sec_btn">
-          <button
-            className="leave_flower"
-            onClick={() => setIsModalOpen(true)} // Open the modal when clicked
-          >
-            Leave A Flower
-          </button>
-          <button className="say_a_prayer">Say A Prayer</button>
-        </div>
-
-        {/* Modal to show the AddFlower component */}
-        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-          <AddFlower /> {/* Render the AddFlower component inside the modal */}
-        </Modal>
-        <button className="say_a_prayer">Say A Prayer</button>
+        <button
+          className="leave_flower"
+          onClick={() => {
+            setIsModalOpen(true);
+            setModalContent("flower");
+          }}
+        >
+          Leave A Flower
+        </button>
+        <button
+          className="say_a_prayer"
+          onClick={() => {
+            setIsModalOpen(true);
+            setModalContent("prayer");
+          }}
+        >
+          Say A Prayer
+        </button>
       </div>
+
+      {/* Modal for AddFlower or AddPrayer */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        {modalContent === "flower" && <AddFlower />}
+        {modalContent === "prayer" && <AddPrayer />}
+      </Modal>
+
       <div className="test">
         <div className="flowers_section">
           {flowersData.map((flower) => (

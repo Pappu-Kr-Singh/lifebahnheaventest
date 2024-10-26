@@ -17,7 +17,7 @@ export const FlowerStore = createContext({
 });
 
 // Prayer Store Context creation with default values
-export const prayerStore = createContext({
+export const PrayerStore = createContext({
   prayerList: [],
   addPrayer: () => {},
   addInitialPrayers: () => {},
@@ -75,6 +75,7 @@ const prayerStoreReducer = (currPrayerList, action) => {
 const PostListProvider = ({ children }) => {
   const [postList, dispatchPostList] = useReducer(postListReducer, []);
   const [flowerList, dispatchFlowerList] = useReducer(flowerStoreReducer, []);
+  const [prayerList, dispatchPrayerList] = useReducer(prayerStoreReducer, []);
 
   // Post List Functions
   const addPost = (userId, postTitle, reactions, postBody, tags) => {
@@ -141,12 +142,11 @@ const PostListProvider = ({ children }) => {
   };
 
   // Prayer Store Functions
-  const addPrayer = (name, prayerText) => {
-    dispatchFlowerList({
-      type: "ADD_FLOWER",
+  const addPrayer = (prayerText) => {
+    dispatchPrayerList({
+      type: "ADD_PRAYER",
       payload: {
         id: Date.now(),
-        name: name,
         prayerText: prayerText,
       },
     });
@@ -154,7 +154,7 @@ const PostListProvider = ({ children }) => {
 
   const addInitialPrayers = (prayers) => {
     dispatchFlowerList({
-      type: "ADD_INITIAL_Prayers",
+      type: "ADD_INITIAL_PRAYERS",
       payload: {
         prayers,
       },
@@ -163,7 +163,7 @@ const PostListProvider = ({ children }) => {
 
   const deletePrayer = (prayerId) => {
     dispatchPrayerList({
-      type: "DELETE_Prayer",
+      type: "DELETE_PRAYER",
       payload: {
         prayerId,
       },
@@ -177,7 +177,11 @@ const PostListProvider = ({ children }) => {
       <FlowerStore.Provider
         value={{ flowerList, addFlower, deleteFlower, addInitialFlowers }}
       >
-        {children}
+        <PrayerStore.Provider
+          value={{ prayerList, addPrayer, deletePrayer, addInitialPrayers }}
+        >
+          {children}
+        </PrayerStore.Provider>
       </FlowerStore.Provider>
     </PostList.Provider>
   );

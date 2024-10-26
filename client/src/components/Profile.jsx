@@ -113,8 +113,8 @@ const Profile = () => {
                   />
                 </div>
                 <div className="Name">
-                  <p>Username: {currentUser.data.user.userName}</p>
-                  <p>Current Role: {currentUser.data.user.roles}</p>
+                  <p>Username: {currentUser?.data.user.userName}</p>
+                  <p>Current Role: {currentUser?.data.user.roles}</p>
                 </div>
                 <span className="text-white">
                   id:

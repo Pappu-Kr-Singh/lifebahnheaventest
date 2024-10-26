@@ -7,16 +7,16 @@ const Header = ({ isAuthenticated }) => {
   const { currentUser, setCurrentUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const [auth, setAuth] = useState(false);
-  //const { currentUser } = useContext(AuthContext);
 
   useEffect(() => {
     if (isAuthenticated) {
       setAuth(true);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const handleLogout = async () => {
     try {
+      // First attempt to logout
       await axios.post(
         "http://localhost:3000/api/v1/users/logout",
         {},
@@ -27,7 +27,7 @@ const Header = ({ isAuthenticated }) => {
         }
       );
       alert("Logout Successful");
-      setCurrentUser(null);
+      setCurrentUser(null); // Clear current user in context
       navigate("/");
     } catch (error) {
       if (
@@ -35,22 +35,20 @@ const Header = ({ isAuthenticated }) => {
         error.response.data &&
         error.response.data.message === "jwt expired"
       ) {
-        // Handle token refresh here
+        // Handle token refresh on token expiry
         try {
           const response = await axios.post(
             "http://localhost:3000/api/v1/users/refresh-token",
-            {
-              refreshToken: currentUser?.data.refreshToken,
-            }
+            { refreshToken: currentUser?.data.refreshToken }
           );
           const { accessToken } = response.data.data;
           // Update access token and retry logout
           currentUser.data.accessToken = accessToken;
-          await handleLogout();
+          await handleLogout(); // Retry logout with refreshed token
         } catch (refreshError) {
           console.error("Error during token refresh:", refreshError);
           alert("Session expired. Please log in again.");
-          setCurrentUser(null);
+          setCurrentUser(null); // Clear current user and reset
           navigate("/");
         }
       } else {
@@ -70,27 +68,11 @@ const Header = ({ isAuthenticated }) => {
               className="d-flex align-items-center text-white fw-bold mb-2 mb-lg-0 text-decoration-none"
             >
               LifeBahn Heaven
-              <svg
-                className="bi me-2"
-                width="40"
-                height="32"
-                role="img"
-                aria-label="Bootstrap"
-              >
-                <use xlinkHref="#bootstrap"></use>
-              </svg>
             </a>
 
             <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
               <li className="nav-item">
-                <Link
-                  to={"/"}
-                  className="nav-link  fw-bold "
-                  aria-current="page"
-                >
-                  <svg className="bi pe-none me-2" width="16" height="16">
-                    <use xlinkHref="#home"></use>
-                  </svg>
+                <Link to={"/"} className="nav-link fw-bold" aria-current="page">
                   Home
                 </Link>
               </li>
@@ -98,18 +80,12 @@ const Header = ({ isAuthenticated }) => {
               {!currentUser ? (
                 <>
                   <li className="nav-item">
-                    <Link to={"/sign-up"} className="nav-link ">
-                      <svg className="bi pe-none me-2" width="16" height="16">
-                        <use xlinkHref="#table"></use>
-                      </svg>
+                    <Link to={"/sign-up"} className="nav-link">
                       SignUp
                     </Link>
                   </li>
                   <li className="nav-item">
-                    <Link to={"/login"} className="nav-link ">
-                      <svg className="bi pe-none me-2" width="16" height="16">
-                        <use xlinkHref="#grid"></use>
-                      </svg>
+                    <Link to={"/login"} className="nav-link">
                       Login
                     </Link>
                   </li>
@@ -121,36 +97,15 @@ const Header = ({ isAuthenticated }) => {
                       Memoriams
                     </Link>
                   </li>
-                  {currentUser.data.roles === "sponsor" ? (
+                  {currentUser.data.roles === "sponsor" && (
                     <li className="nav-item">
-                      <Link to={"/create-post"} className="nav-link fw-bold  ">
-                        <svg className="bi pe-none me-2" width="16" height="16">
-                          <use xlinkHref="#speedometer2"></use>
-                        </svg>
+                      <Link to={"/create-post"} className="nav-link fw-bold">
                         Add Rip
                       </Link>
                     </li>
-                  ) : (
-                    ""
                   )}
                 </>
               )}
-
-              {/* <li>
-                <Link to={"/"} className="nav-link px-3 ">
-                  Groups
-                </Link>
-              </li> 
-              <li>
-                <Link to={"/about-us"} className="nav-link px-3 ">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link to={"/contact-us"} className="nav-link px-3 ">
-                  Contact us
-                </Link>
-              </li>*/}
             </ul>
 
             <form
@@ -178,7 +133,7 @@ const Header = ({ isAuthenticated }) => {
                       src={
                         currentUser?.data?.user?.avatar || "default-avatar-url"
                       }
-                      alt="mdo"
+                      alt="avatar"
                       width="32"
                       height="32"
                       className="rounded-circle"
@@ -189,26 +144,25 @@ const Header = ({ isAuthenticated }) => {
                   ""
                 )}
               </a>
-              <ul className="dropdown-menu text-small" style={{}}>
+              <ul className="dropdown-menu text-small">
                 {currentUser ? (
                   <>
                     <li>
-                      <Link
-                        to={"/profile"}
-                        className="dropdown-item bg-light"
-                        href="#"
-                      >
+                      <Link to={"/profile"} className="dropdown-item bg-light">
                         Profile
                       </Link>
                     </li>
                     <li>
                       <hr className="dropdown-divider" />
                     </li>
-                    <Link>
-                      <button className="dropdown-item" onClick={handleLogout}>
+                    <li>
+                      <button
+                        className="dropdown-item bg-light"
+                        onClick={handleLogout}
+                      >
                         Sign out
                       </button>
-                    </Link>
+                    </li>
                   </>
                 ) : (
                   ""
